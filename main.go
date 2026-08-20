@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -10,18 +11,25 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, `Usage: gh contrib-graph [username]
+
+Display a GitHub contribution graph in the terminal, sized to fit the
+current terminal width.
+
+With no username, shows the graph for the currently authenticated gh
+user (requires "gh auth login").
+`)
+	}
+	flag.Parse()
+
+	if err := run(flag.Arg(0)); err != nil {
 		fmt.Fprintln(os.Stderr, "gh-contrib-graph:", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
-	login := ""
-	if len(os.Args) > 1 {
-		login = os.Args[1]
-	}
-
+func run(login string) error {
 	rest, err := ghapi.NewRESTClient()
 	if err != nil {
 		return err

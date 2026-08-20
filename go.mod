@@ -1,6 +1,6 @@
 module github.com/Jangmyun/gh-contrib-graph
 
-go 1.26.3
+go 1.23
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0

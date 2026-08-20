@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -49,7 +50,10 @@ func fixtureCalendar() *github.ContributionCalendar {
 }
 
 func TestRenderStructure(t *testing.T) {
-	out := Render("testuser", fixtureCalendar(), 5, 2)
+	// Fixed, generous width so the grid isn't truncated by the test runner's
+	// own (possibly absent) terminal size — width-fitting is covered by
+	// TestFitWeeks / TestRenderFitsWidth below.
+	out := render("testuser", fixtureCalendar(), 5, 2, 200)
 	plain := stripANSI(out)
 	lines := strings.Split(plain, "\n")
 
@@ -103,5 +107,48 @@ func TestRenderStructure(t *testing.T) {
 		if counts[unwanted] != 0 {
 			t.Errorf("unexpected %s row label found (%d occurrences)", unwanted, counts[unwanted])
 		}
+	}
+}
+
+func TestFitWeeks(t *testing.T) {
+	weeks := fixtureCalendar().Weeks // 20 weeks
+
+	cases := []struct {
+		name  string
+		width int
+		want  int
+	}{
+		{"plenty of room keeps every week", 300, len(weeks)},
+		{"narrow terminal keeps only the most recent weeks", 40, (40 - boxOverhead) / 2},
+		{"absurdly narrow terminal keeps at least one week", 5, 1},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := fitWeeks(weeks, c.width)
+			if len(got) != c.want {
+				t.Errorf("fitWeeks width=%d returned %d weeks, want %d", c.width, len(got), c.want)
+			}
+			if len(got) > 0 && len(weeks) > 0 && got[len(got)-1].ContributionDays[0].Date != weeks[len(weeks)-1].ContributionDays[0].Date {
+				t.Errorf("fitWeeks must keep the most recent week last")
+			}
+		})
+	}
+}
+
+// TestRenderFitsWidth is the regression test for the reported bug: at a
+// realistic (narrow) terminal width, every rendered line — including the
+// border — must stay within that width, so the terminal never soft-wraps
+// mid-box and mangles the border.
+func TestRenderFitsWidth(t *testing.T) {
+	for _, width := range []int{60, 80, 120, 200} {
+		t.Run(fmt.Sprintf("width=%d", width), func(t *testing.T) {
+			out := render("testuser", fixtureCalendar(), 5, 2, width)
+			plain := stripANSI(out)
+			for i, l := range strings.Split(plain, "\n") {
+				if got := lipgloss.Width(l); got > width {
+					t.Errorf("line %d is %d cells wide, exceeds terminal width %d: %q", i, got, width, l)
+				}
+			}
+		})
 	}
 }

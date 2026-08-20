@@ -15,16 +15,11 @@ const (
 
 var weekdayLabels = map[int]string{1: "Mon", 3: "Wed", 5: "Fri"}
 
-// Grid renders the month-header row plus the 7 weekday rows of the heatmap.
-func Grid(cal *github.ContributionCalendar) string {
-	weeks := cal.Weeks
-
-	var days []github.ContributionDay
-	for _, w := range weeks {
-		days = append(days, w.ContributionDays...)
-	}
-	max := contrib.MaxCount(days)
-
+// Grid renders the month-header row plus the 7 weekday rows of the heatmap
+// for weeks, coloring cells relative to max (the dataset's peak day count,
+// which the caller computes across the full year even when weeks has been
+// truncated to fit the terminal width).
+func Grid(weeks []github.ContributionWeek, max int) string {
 	lines := make([]string, 0, 8)
 	lines = append(lines, monthHeader(weeks))
 	for weekday := 0; weekday < 7; weekday++ {

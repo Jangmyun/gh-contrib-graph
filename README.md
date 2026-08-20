@@ -2,7 +2,7 @@
 
 A GitHub CLI extension to display your contribution graph directly in the terminal.
 
-![screenshot](docs/screenshot.png)
+![screenshot](docs/screenshot.gif)
 
 Design inspired by [ghstats-cli](https://github.com/d1rshan/ghstats-cli).
 

@@ -4,7 +4,7 @@ A GitHub CLI extension to display your contribution graph directly in the termin
 
 ![screenshot](docs/screenshot.png)
 
-Design inspired by ghstats-cli.
+Design inspired by [ghstats-cli](https://github.com/d1rshan/ghstats-cli).
 
 ## Install
 

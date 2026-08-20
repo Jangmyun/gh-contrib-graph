@@ -16,8 +16,8 @@ Requires `gh auth login` to already be set up — the extension reuses your exis
 
 ```sh
 # your own contribution graph
-gh contrib
+gh contrib-graph
 
 # someone else's
-gh contrib octocat
+gh contrib-graph octocat
 ```
